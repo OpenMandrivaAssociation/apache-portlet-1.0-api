@@ -1,4 +1,4 @@
-# Copyright (c) 2000-2005, JPackage Project
+# Copyright (c) 2000-2007, JPackage Project
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,41 +28,61 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define base_name	portlet-1.0-api
-%define section		free
-%define gcj_support	1
+%define _with_gcj_support 1
+%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
 
-Name:		apache-portlet-1.0-api
-Version:	1.0
-Release:	%mkrel 3.3
-Epoch:		0
+# If you don't want to build with maven, and use straight ant instead,
+# give rpmbuild option '--without maven'
+
+%define _without_maven 1
+%define with_maven %{!?_without_maven:1}%{?_without_maven:0}
+%define without_maven %{?_without_maven:1}%{!?_without_maven:0}
+
+%define base_name portlet-1.0-api
+
+%define section free
+
+Name:           apache-portlet-1.0-api
+Version:        1.0
+Release:        %mkrel 5.0.1
+Epoch:          0
 Summary:        Portlet API 1.0 from Jetspeed2
-License:	Apache License
-Url:		http://portals.apache.org/jetspeed-2/
+License:        Apache License
+Url:            http://portals.apache.org/jetspeed-2/
 Group:          Development/Java
-#Vendor:		JPackage Project
-#Distribution:	JPackage
-Source0:	apache-portlet-1.0-api.tar.bz2
+Source0:        apache-portlet-1.0-api.tar.gz
 # svn export http://svn.apache.org/repos/asf/portals/jetspeed-2/tags/JETSPEED-RELEASE-2.0/portlet-api/
-Source1:	apache-portlet-1.0-api-project-info.xml
-Source2:	apache-portlet-1.0-api-LICENSE.TXT
-Patch0:		apache-portlet-1.0-api-project_xml.patch
-%if 0
-BuildRequires:	maven
-%endif
-BuildRequires:  jpackage-utils >= 0:1.6
+Source1:        apache-portlet-1.0-api-pom.xml
+Source2:        apache-portlet-1.0-api-LICENSE.TXT
+Source3:        apache-portlet-1.0-api-build.xml
+BuildRequires:  jpackage-utils >= 0:1.7.2
 BuildRequires:  java-devel >= 0:1.4
-BuildRequires:	ant >= 0:1.6
-Provides:	portlet = %{epoch}:%{version}
-Provides:	portlet-1.0-api = %{epoch}:%{version}
-%if %{gcj_support}
-Requires(post): java-gcj-compat
-Requires(postun): java-gcj-compat
-BuildRequires:  java-gcj-compat-devel
-%else
-BuildArch:	noarch
+BuildRequires:  ant >= 0:1.6
+%if %{with_maven}
+BuildRequires:  maven2 >= 2.0.4-9
+BuildRequires:  maven2-plugin-compiler
+BuildRequires:  maven2-plugin-install
+BuildRequires:  maven2-plugin-jar
+BuildRequires:  maven2-plugin-javadoc
+BuildRequires:  maven2-plugin-release
+BuildRequires:  maven2-plugin-resources
+BuildRequires:  maven2-plugin-surefire
 %endif
-BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
+Requires(post): jpackage-utils >= 0:1.7.2
+Requires(postun): jpackage-utils >= 0:1.7.2 
+
+Provides:       portlet = %{epoch}:%{version}
+Provides:       portlet-1.0-api = %{epoch}:%{version}
+
+%if ! %{gcj_support}
+BuildArch:      noarch
+%endif
+BuildRoot:      %{_tmppath}/%{name}-%{version}-buildroot
+%if %{gcj_support}
+BuildRequires:    java-gcj-compat-devel
+Requires(post):   java-gcj-compat
+Requires(postun): java-gcj-compat
+%endif
 
 %description
 Java Standard Portlet API accoring to JSR-168, from Jetspeed-2 
@@ -70,48 +90,49 @@ Java Standard Portlet API accoring to JSR-168, from Jetspeed-2
 %package javadoc
 Summary:        Javadoc %{name}
 Group:          Development/Java
+Requires(post):   /bin/rm,/bin/ln
+Requires(postun): /bin/rm
 
 %description javadoc
 %{summary}.
 
 
 %prep
-%setup -q -n portlet-api
+%setup -q -n %{name}
 # remove all binary libs
 find . -name "*.jar" -exec rm -f {} \;
-cp %{SOURCE1} project-info.xml
+cp %{SOURCE1} pom.xml
+cp %{SOURCE3} build.xml
 
-%patch0 -b .sav
 
 %build
-%if 0
-export MAVEN_HOME_LOCAL=$(pwd)/.maven
-maven \
-	-Dmaven.repo.remote=file:/usr/share/maven/repository \
-	-Dmaven.home.local=$MAVEN_HOME_LOCAL \
-	jar:jar javadoc
+%if %{with_maven}
+export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
+mvn-jpp -e \
+        -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
+        install javadoc:javadoc
+%else
+%{ant} jar javadoc
 %endif
-%{__mkdir_p} target
-%{__mkdir_p} target/docs/apidocs
-pushd src/java
-%{javac} `find . -type f -name "*.java"`
-%{jar} cf ../../target/portlet-api-1.0.jar `find . -type f -name "*.class"`
-%{javadoc} -d ../../target/docs/apidocs `find . -type f -name "*.java"`
 
 %install
-%{__rm} -rf %{buildroot}
-
+rm -rf $RPM_BUILD_ROOT
 install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
 
 install -m 0644 target/portlet-api-1.0.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
 (cd $RPM_BUILD_ROOT%{_javadir} && ln -sf %{name}-%{version}.jar %{base_name}-%{version}.jar)
 
+%add_to_maven_depmap javax.portlet portlet-api 1.0 JPP %{base_name}
 # create unversioned symlinks
 (cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} $(echo $jar | sed -e 's+-%{version}\.jar+.jar+'); done)
 
+#poms
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
+install -pm 644 pom.xml $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.portlet-api.pom
+
 install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr target/docs/apidocs/* \
-	$RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -pr target/site/apidocs/* \
+        $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
 
 install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
@@ -124,35 +145,31 @@ cp %{SOURCE2} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/LICENSE.TXT
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%if %{gcj_support}
 %post
+%update_maven_depmap
+%if %{gcj_support}
 %{update_gcjdb}
-
-%postun
-%{clean_gcjdb}
 %endif
 
-%post javadoc
-rm -f %{_javadocdir}/%{name}
-ln -s %{name}-%{version} %{_javadocdir}/%{name}
-
-%postun javadoc
-if [ "$1" = "0" ]; then
-  rm -f %{_javadocdir}/%{name}
-fi
+%postun
+%update_maven_depmap
+%if %{gcj_support}
+%{clean_gcjdb}
+%endif
 
 %files
 %defattr(0644,root,root,0755)
 %doc %{_docdir}/%{name}-%{version}/LICENSE.TXT
 %{_javadir}/%{name}*.jar
 %{_javadir}/%{base_name}*.jar
+%{_datadir}/maven2
+%config(noreplace) %{_mavendepmapfragdir}/*
 %if %{gcj_support}
 %dir %{_libdir}/gcj/%{name}
-%{_libdir}/gcj/%{name}/*
+%attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-%{version}.jar.*
 %endif
 
 %files javadoc
 %defattr(0644,root,root,0755)
 %{_javadocdir}/%{name}-%{version}
-%ghost %{_javadocdir}/%{name}
-
+%dir %{_javadocdir}/%{name}
