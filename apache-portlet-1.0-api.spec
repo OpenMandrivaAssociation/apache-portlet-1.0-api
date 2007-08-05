@@ -58,6 +58,7 @@ Source3:        apache-portlet-1.0-api-build.xml
 BuildRequires:  jpackage-utils >= 0:1.7.2
 BuildRequires:  java-devel >= 0:1.4
 BuildRequires:  ant >= 0:1.6
+BuildRequires:  ant-nodeps
 %if %{with_maven}
 BuildRequires:  maven2 >= 2.0.4-9
 BuildRequires:  maven2-plugin-compiler
