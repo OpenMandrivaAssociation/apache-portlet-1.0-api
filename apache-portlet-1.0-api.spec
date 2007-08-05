@@ -112,6 +112,8 @@ mvn-jpp -e \
         -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
         install javadoc:javadoc
 %else
+export CLASSPATH=
+export OPT_JAR_LIST="ant/ant-nodeps"
 %{ant} jar javadoc
 %endif
 
