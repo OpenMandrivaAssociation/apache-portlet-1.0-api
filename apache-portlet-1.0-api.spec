@@ -44,7 +44,7 @@
 
 Name:           apache-portlet-1.0-api
 Version:        1.0
-Release:        %mkrel 5.0.1
+Release:        %mkrel 5.0.2
 Epoch:          0
 Summary:        Portlet API 1.0 from Jetspeed2
 License:        Apache License
@@ -81,8 +81,6 @@ BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-buildroot
 %if %{gcj_support}
 BuildRequires:    java-gcj-compat-devel
-Requires(post):   java-gcj-compat
-Requires(postun): java-gcj-compat
 %endif
 
 %description
