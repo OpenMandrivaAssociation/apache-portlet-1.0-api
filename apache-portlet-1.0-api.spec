@@ -44,7 +44,7 @@
 
 Name:           apache-portlet-1.0-api
 Version:        1.0
-Release:        %mkrel 5.0.2
+Release:        %mkrel 5.0.3
 Epoch:          0
 Summary:        Portlet API 1.0 from Jetspeed2
 License:        Apache License
@@ -55,7 +55,7 @@ Source0:        apache-portlet-1.0-api.tar.gz
 Source1:        apache-portlet-1.0-api-pom.xml
 Source2:        apache-portlet-1.0-api-LICENSE.TXT
 Source3:        apache-portlet-1.0-api-build.xml
-BuildRequires:  jpackage-utils >= 0:1.7.2
+BuildRequires:  java-rpmbuild >= 0:1.7.2
 BuildRequires:  java-devel >= 0:1.4
 BuildRequires:  ant >= 0:1.6
 BuildRequires:  ant-nodeps
