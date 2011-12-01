@@ -117,34 +117,34 @@ export OPT_JAR_LIST="ant/ant-nodeps"
 %endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
+rm -rf %{buildroot}
+install -d -m 755 %{buildroot}%{_javadir}
 
-install -m 0644 target/portlet-api-1.0.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && ln -sf %{name}-%{version}.jar %{base_name}-%{version}.jar)
+install -m 0644 target/portlet-api-1.0.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+(cd %{buildroot}%{_javadir} && ln -sf %{name}-%{version}.jar %{base_name}-%{version}.jar)
 
 %add_to_maven_depmap javax.portlet portlet-api 1.0 JPP %{base_name}
 # create unversioned symlinks
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} $(echo $jar | sed -e 's+-%{version}\.jar+.jar+'); done)
+(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} $(echo $jar | sed -e 's+-%{version}\.jar+.jar+'); done)
 
 #poms
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
-install -pm 644 pom.xml $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.portlet-api.pom
+install -d -m 755 %{buildroot}%{_datadir}/maven2/poms
+install -pm 644 pom.xml %{buildroot}%{_datadir}/maven2/poms/JPP.portlet-api.pom
 
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
 cp -pr target/site/apidocs/* \
-        $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
+        %{buildroot}%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name} # ghost symlink
 
-install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-cp %{SOURCE2} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/LICENSE.TXT
+install -d -m 755 %{buildroot}%{_docdir}/%{name}-%{version}
+cp %{SOURCE2} %{buildroot}%{_docdir}/%{name}-%{version}/LICENSE.TXT
 
 %if %{gcj_support}
 %{_bindir}/aot-compile-rpm
 %endif
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 %update_maven_depmap
