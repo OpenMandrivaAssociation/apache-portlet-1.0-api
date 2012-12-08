@@ -44,7 +44,7 @@
 
 Name:           apache-portlet-1.0-api
 Version:        1.0
-Release:        %mkrel 5.0.7
+Release:        %mkrel 5.0.9
 Epoch:          0
 Summary:        Portlet API 1.0 from Jetspeed2
 License:        Apache License
@@ -117,34 +117,34 @@ export OPT_JAR_LIST="ant/ant-nodeps"
 %endif
 
 %install
-rm -rf %{buildroot}
-install -d -m 755 %{buildroot}%{_javadir}
+rm -rf $RPM_BUILD_ROOT
+install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
 
-install -m 0644 target/portlet-api-1.0.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-(cd %{buildroot}%{_javadir} && ln -sf %{name}-%{version}.jar %{base_name}-%{version}.jar)
+install -m 0644 target/portlet-api-1.0.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
+(cd $RPM_BUILD_ROOT%{_javadir} && ln -sf %{name}-%{version}.jar %{base_name}-%{version}.jar)
 
 %add_to_maven_depmap javax.portlet portlet-api 1.0 JPP %{base_name}
 # create unversioned symlinks
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} $(echo $jar | sed -e 's+-%{version}\.jar+.jar+'); done)
+(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} $(echo $jar | sed -e 's+-%{version}\.jar+.jar+'); done)
 
 #poms
-install -d -m 755 %{buildroot}%{_datadir}/maven2/poms
-install -pm 644 pom.xml %{buildroot}%{_datadir}/maven2/poms/JPP.portlet-api.pom
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
+install -pm 644 pom.xml $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.portlet-api.pom
 
-install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
+install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 cp -pr target/site/apidocs/* \
-        %{buildroot}%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name} # ghost symlink
+        $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
 
-install -d -m 755 %{buildroot}%{_docdir}/%{name}-%{version}
-cp %{SOURCE2} %{buildroot}%{_docdir}/%{name}-%{version}/LICENSE.TXT
+install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
+cp %{SOURCE2} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/LICENSE.TXT
 
 %if %{gcj_support}
 %{_bindir}/aot-compile-rpm
 %endif
 
 %clean
-rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 %post
 %update_maven_depmap
@@ -174,3 +174,64 @@ rm -rf %{buildroot}
 %defattr(0644,root,root,0755)
 %{_javadocdir}/%{name}-%{version}
 %dir %{_javadocdir}/%{name}
+
+
+%changelog
+* Mon May 02 2011 Oden Eriksson <oeriksson@mandriva.com> 0:1.0-5.0.7mdv2011.0
++ Revision: 662782
+- mass rebuild
+
+* Mon Nov 29 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.0-5.0.6mdv2011.0
++ Revision: 603180
+- rebuild
+
+* Tue Mar 16 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.0-5.0.5mdv2010.1
++ Revision: 521999
+- rebuilt for 2010.1
+
+* Sun Aug 09 2009 Oden Eriksson <oeriksson@mandriva.com> 0:1.0-5.0.4mdv2010.0
++ Revision: 413029
+- rebuild
+
+* Thu Dec 20 2007 Olivier Blin <oblin@mandriva.com> 0:1.0-5.0.3mdv2009.0
++ Revision: 135823
+- restore BuildRoot
+
+  + Thierry Vignaud <tv@mandriva.org>
+    - kill re-definition of %%buildroot on Pixel's request
+
+* Sun Dec 16 2007 Anssi Hannula <anssi@mandriva.org> 0:1.0-5.0.3mdv2008.1
++ Revision: 120825
+- buildrequire java-rpmbuild, i.e. build with icedtea on x86(_64)
+
+* Sat Sep 15 2007 Anssi Hannula <anssi@mandriva.org> 0:1.0-5.0.2mdv2008.0
++ Revision: 87200
+- rebuild to filter out autorequires of GCJ AOT objects
+- remove unnecessary Requires(post) on java-gcj-compat
+
+* Sun Aug 05 2007 David Walluck <walluck@mandriva.org> 0:1.0-5.0.1mdv2008.0
++ Revision: 59193
+- add ant-nodeps BuildRequires
+- set OPT_JAR_LIST
+- sync with JPackage
+
+* Tue Jul 03 2007 Anssi Hannula <anssi@mandriva.org> 0:1.0-3.3mdv2008.0
++ Revision: 47574
+- rebuild with new libgcj
+
+
+* Sat Aug 05 2006 David Walluck <walluck@mandriva.org> 0:1.0-3.2mdv2007.0
+- bunzip2 patches
+
+* Mon Jun 12 2006 David Walluck <walluck@mandriva.org> 0:1.0-3.1mdv2007.0
+- release
+
+* Fri Apr 28 2006 Fernando Nasser <fnasser@redhat.com> - 0:1.0-3jpp
+- Add missing provides for backward compatibility with old name
+
+* Fri Apr 28 2006 Fernando Nasser <fnasser@redhat.com> - 0:1.0-2jpp
+- Add backward compatibility to portlet-1.0-api
+
+* Tue Mar 14 2006 Ralph Apel <r.apel at r-apel.de> 0:1.0-1jpp
+- First JPackage build for 1.7 reducing from portals-jetspeed2
+
