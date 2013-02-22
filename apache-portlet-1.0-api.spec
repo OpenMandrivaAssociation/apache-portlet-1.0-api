@@ -28,12 +28,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define _with_gcj_support 1
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
-
 # If you don't want to build with maven, and use straight ant instead,
 # give rpmbuild option '--without maven'
 
+%bcond_with	gcj_support
 %bcond_with	maven
 %bcond_without	bootstrap
 
@@ -76,11 +74,11 @@ Requires(postun): jpackage-utils >= 0:1.7.2
 Provides:       portlet = %{epoch}:%{version}
 Provides:       portlet-1.0-api = %{epoch}:%{version}
 
-%if ! %{gcj_support}
+%if ! %{with gcj_support}
 BuildArch:      noarch
 %endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-buildroot
-%if %{gcj_support}
+%if %{with gcj_support}
 BuildRequires:    java-gcj-compat-devel
 %endif
 
@@ -142,7 +140,7 @@ ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
 install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
 cp %{SOURCE2} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/LICENSE.TXT
 
-%if %{gcj_support}
+%if %{with gcj_support}
 %{_bindir}/aot-compile-rpm
 %endif
 
@@ -151,13 +149,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 %update_maven_depmap
-%if %{gcj_support}
+%if %{with gcj_support}
 %{update_gcjdb}
 %endif
 
 %postun
 %update_maven_depmap
-%if %{gcj_support}
+%if %{with gcj_support}
 %{clean_gcjdb}
 %endif
 
@@ -168,7 +166,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_javadir}/%{base_name}*.jar
 %{_datadir}/maven2
 %config(noreplace) %{_mavendepmapfragdir}/*
-%if %{gcj_support}
+%if %{with gcj_support}
 %dir %{_libdir}/gcj/%{name}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-%{version}.jar.*
 %endif
