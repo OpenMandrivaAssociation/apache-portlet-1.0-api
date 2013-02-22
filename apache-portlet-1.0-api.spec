@@ -35,6 +35,7 @@
 # give rpmbuild option '--without maven'
 
 %bcond_with	maven
+%bcond_without	bootstrap
 
 %define base_name portlet-1.0-api
 
@@ -56,7 +57,9 @@ Source3:        apache-portlet-1.0-api-build.xml
 BuildRequires:  java-rpmbuild >= 0:1.7.2
 BuildRequires:  java-devel >= 0:1.4
 BuildRequires:  ant >= 0:1.6
+%if !%{with bootstrap}
 BuildRequires:  ant-nodeps
+%endif
 %if %{with maven}
 BuildRequires:  maven2 >= 2.0.4-9
 BuildRequires:  maven2-plugin-compiler
@@ -110,7 +113,9 @@ mvn-jpp -e \
         install javadoc:javadoc
 %else
 export CLASSPATH=
+%if !%{with bootstrap}
 export OPT_JAR_LIST="ant/ant-nodeps"
+%endif
 %{ant} jar javadoc
 %endif
 
