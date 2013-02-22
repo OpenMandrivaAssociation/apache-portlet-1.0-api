@@ -34,9 +34,7 @@
 # If you don't want to build with maven, and use straight ant instead,
 # give rpmbuild option '--without maven'
 
-%define _without_maven 1
-%define with_maven %{!?_without_maven:1}%{?_without_maven:0}
-%define without_maven %{?_without_maven:1}%{!?_without_maven:0}
+%bcond_with	maven
 
 %define base_name portlet-1.0-api
 
@@ -59,7 +57,7 @@ BuildRequires:  java-rpmbuild >= 0:1.7.2
 BuildRequires:  java-devel >= 0:1.4
 BuildRequires:  ant >= 0:1.6
 BuildRequires:  ant-nodeps
-%if %{with_maven}
+%if %{with maven}
 BuildRequires:  maven2 >= 2.0.4-9
 BuildRequires:  maven2-plugin-compiler
 BuildRequires:  maven2-plugin-install
@@ -105,7 +103,7 @@ cp %{SOURCE3} build.xml
 
 
 %build
-%if %{with_maven}
+%if %{with maven}
 export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
 mvn-jpp -e \
         -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
