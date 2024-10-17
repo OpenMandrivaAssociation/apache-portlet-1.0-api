@@ -45,7 +45,7 @@ Release:        5.0.16
 Epoch:          0
 Summary:        Portlet API 1.0 from Jetspeed2
 License:        Apache License
-Url:            http://portals.apache.org/jetspeed-2/
+Url:            https://portals.apache.org/jetspeed-2/
 Group:          Development/Java
 Source0:        apache-portlet-1.0-api.tar.gz
 # svn export http://svn.apache.org/repos/asf/portals/jetspeed-2/tags/JETSPEED-RELEASE-2.0/portlet-api/
